@@ -23,6 +23,8 @@ import java.util.*;
  */
 public class Driver {
 
+    public void MyMethod(){}
+
     /**
      * Основнеий метод програми. Виводить та обробляє вибір користувача.
      *

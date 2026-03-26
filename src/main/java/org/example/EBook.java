@@ -84,11 +84,12 @@ public class EBook extends Book {
      */
     @Override
     public String toString() {
-        return "Електронна " + super.toString() + String.format(", Формат: %s, Розмір: %.2f MB", format, fileSize);
+        return "Електронна " + super.toString() + String.format(", "
+                + "Формат: %s, Розмір: %.2f MB", format, fileSize);
     }
 
     /**
-     * Генерує унікальний хеш-код для об'єкта
+     * Генерує унікальний хеш-код для об'єкта.
      *
      * @return Числове значення хешу.
      */
@@ -105,10 +106,14 @@ public class EBook extends Book {
      */
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
         EBook eBook = (EBook) o;
-        return Double.compare(fileSize, eBook.fileSize) == 0 &&
-                format == eBook.format;
+        return Double.compare(fileSize, eBook.fileSize) == 0
+                && format == eBook.format;
     }
 }

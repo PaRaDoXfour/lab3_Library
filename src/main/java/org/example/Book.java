@@ -28,8 +28,7 @@ public abstract class Book implements Comparable<Book> {
      * @param genre  Жанр книги
      * @throws TitleException якщо назва порожня
      */
-    public Book(String title, String author, int year, String isbn, int pages, Genre genre) throws TitleException,
-            AuthorException,YearException, IsbnException, PagesException, GenreException {
+    public Book(String title, String author, int year, String isbn, int pages, Genre genre) throws TitleException, AuthorException,YearException, IsbnException, PagesException, GenreException {
         this.id = UUID.randomUUID();
         setTitle(title);
         setAuthor(author);
@@ -236,7 +235,7 @@ public abstract class Book implements Comparable<Book> {
         if (result != 0) return result;
 
         result = Integer.compare(this.getYear(), other.getYear());
-        if (result != 0) return result;
+        if (result!=0) return result;
 
         result = this.getIsbn().compareTo(other.getIsbn());
         if (result != 0) return result;
@@ -294,7 +293,7 @@ public abstract class Book implements Comparable<Book> {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
-        Book book = (Book) obj;
+        Book book=(Book) obj;
         return id.equals(book.id)&&
                 title.equals(book.title) &&
                 author.equals(book.author) &&
