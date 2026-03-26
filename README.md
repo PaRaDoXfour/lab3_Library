@@ -1,67 +1,65 @@
-# Library System (Individual Mini-Project)
+# 📚 Library Management System - Developer Guide
 
-## Project Description
-This project is a Java console program developed as part of a laboratory project. It is based on the architecture of the previous project and implements a library fund management system.
+Цей проєкт призначений для управління бібліотечним фондом, реєстрації видачі та повернення книг.
 
-The main goal of the project is to implement the functionality of issuing and returning books, as well as using **Stream API** to process data collections.
+---
 
-## Implemented functionality
-According to the technical specifications, the **"Book Issue/Book Return"** option has been added to the main menu, which allows:
-* **Issue a book**: register the issuance of the selected book to the borrower with a date entry.
-* **Return a book**: update the issuance status and return the copy to the library inventory.
-* **View active issuances**: display a list of all books currently in the hands of users.
+## 🛠 Підготовка середовища
 
-## Architecture and Classes
-The project uses an object-oriented model to describe library entities:
+Якщо ви щойно встановили ОС, виконайте наступні кроки:
 
-### Entities (Models)
-* **`Book`**: an abstract base class that contains general information about a book: title, author, year, ISBN, and genre.
-* **`EBook`, `PaperBook`, `Audiobook`, `RareBook`**: specialized book types with their own attributes (file size, format, narrator, cost, etc.).
-* **`LoanRecord`**: a new class that represents a record of a specific book being issued to a specific person.
+### 1. Встановлення необхідного ПЗ
+Вам знадобляться:
+* **Java Development Kit (JDK) 17 або вище:** Завантажити з Oracle або через пакетний менеджер (напр., `brew install openjdk@17` для macOS).
+* **Apache Maven:** Для збирання проекту та керування залежностями.
+* **Git:** Для клонування репозиторію.
 
-### Logic and Services
-* **`Library`**: a class for managing inventory (`Map<Book, Integer>`) and the list of issuances (`List<LoanRecord>`).
-* **`FileHandler`**: a class for automatically loading and saving data to the `input.txt` file.
-* **`Driver`**: the entry point of the program, implementing a text-based user interface.
+### 2. Клонування проекту
+```bash
+git clone [https://github.com/PaRaDoXfour/Lab4_Library.git](https://github.com/PaRaDoXfour/Lab4_Library.git)
+cd Lab4_Library
+```
 
-## Data Handling
-* **Save**: the program automatically reads the library from the `input.txt` file on startup and saves all changes (including new books) on exit.
-* **Validation**: an `Exception` system is implemented to check the correctness of the ISBN, year of publication, number of pages, and availability of copies in the library.
+### 3. Налаштування залежностей
+Проект використовує Maven. Для завантаження всіх бібліотек виконайте:
+```bash
+mvn clean install
+```
 
-## Data file format (input.txt)
-### For correct data loading, the file must have the following structure:
+## ⚙️ Конфігурація та запуск
 
-1. **Library block**:
+### Створення "Бази даних" (Файлу даних)
+Проект використовує файл `input.txt` як сховище. Переконайтеся, що файл знаходиться в кореневій директорії проекту. Структура файлу повинна відповідати формату:
 
+```plaintext
 [Library]
+Назва бібліотеки
+Адреса
 
-Library name
-
-Library address
-
-2. **Book blocks** (separated by a blank line):
-
-[BookType] (e.g. [EBook] or [PaperBook])
-
-Title
-
-Author
-
-Year
-
+[PaperBook]
+Назва
+Автор
+Рік
 ISBN
+...
+```
 
-Pages
+### Запуск проекту у режимі розробки
+Для запуску головного класу Driver через Maven:
 
-Genre
+```bash
+mvn exec:java -Dexec.mainClass="org.example.Driver"
+```
 
-[Type-specific fields]
+## ⌨️ Базові команди
 
-## Technologies used
+* **Збирання проекту:** `mvn compile`
+* **Запуск тестів:** `mvn test`
+* **Перевірка стилю коду (Checkstyle):** `./check_all.sh` (для Linux/macOS) або `mvn checkstyle:check`
+* **Очищення тимчасових файлів:** `mvn clean`
 
-* **Java Collection Framework**: using `HashMap`, `TreeMap` and `ArrayList` to manage the library.
-* **Java Stream API**: used to filter records, search by UUID and sort books.
-* **Java Time API**: working with issue and return dates (`LocalDate`).
+## 📝 Основні операції для розробника
 
-**Due date:** June 13, 2025
-
+* **Додавання нової книги:** Через меню в консолі (дані автоматично збережуться в `input.txt` при виході).
+* **Валідація:** При зміні логіки перевіряйте класи `Exception`, що відповідають за валідацію ISBN та дат.
+* **Stream API:** Для зміни алгоритмів пошуку або сортування редагуйте відповідні методи в класі `Library`.
