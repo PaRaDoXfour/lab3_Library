@@ -105,3 +105,41 @@ java.lang.IllegalArgumentException: Invalid UUID string: abc
 [2026-03-27 22:40:35] [DEBUG] [org.example.FileHandler] - Збереження у файл 'input.txt' завершено успішно.
 [2026-03-27 22:40:35] [INFO ] [org.example.Driver] - Дані бібліотеки успішно збережено.
 [2026-03-27 22:40:35] [INFO ] [org.example.Driver] - Програму завершено.
+[2026-03-27 23:09:36] [INFO ] [org.example.Driver] - Запуск програми Library_project.
+[2026-03-27 23:09:36] [INFO ] [org.example.Driver] - Бібліотеку 'Центральна міська бібліотека' успішно завантажено з файлу.
+[2026-03-27 23:11:18] [ERROR] [org.example.Driver] - [ErrorID: 077ab047-79b8-45b2-a29a-6a3e8597a968] - Критична помилка при пошуку книги за UUID. Контекст: uuidInput='abc'.
+java.lang.IllegalArgumentException: Invalid UUID string: abc
+	at java.base/java.util.UUID.fromString1(UUID.java:280)
+	at java.base/java.util.UUID.fromString(UUID.java:258)
+	at org.example.Driver.searchAndDisplayByUUID(Driver.java:630)
+	at org.example.Driver.showSearchMenu(Driver.java:606)
+	at org.example.Driver.menu(Driver.java:145)
+	at org.example.Driver.main(Driver.java:89)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.codehaus.mojo.exec.AbstractExecJavaBase.executeMainMethod(AbstractExecJavaBase.java:402)
+	at org.codehaus.mojo.exec.ExecJavaMojo.executeMainMethod(ExecJavaMojo.java:142)
+	at org.codehaus.mojo.exec.AbstractExecJavaBase.doExecClassLoader(AbstractExecJavaBase.java:377)
+	at org.codehaus.mojo.exec.AbstractExecJavaBase.lambda$execute$0(AbstractExecJavaBase.java:287)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+[2026-03-27 23:12:03] [INFO ] [org.example.Driver] - Дані бібліотеки успішно збережено.
+[2026-03-27 23:12:03] [INFO ] [org.example.Driver] - Програму завершено.
+[2026-03-27 23:21:37] [INFO ] [org.example.Driver] [Admin] [e3229e5e-e933-4c6f-bb61-0d661f042ae0] - Запуск програми Library_project.
+[2026-03-27 23:21:37] [INFO ] [org.example.Driver] [Admin] [e3229e5e-e933-4c6f-bb61-0d661f042ae0] - Бібліотеку 'Центральна міська бібліотека' успішно завантажено з файлу.
+[2026-03-27 23:22:01] [ERROR] [org.example.Driver] [Admin] [e3229e5e-e933-4c6f-bb61-0d661f042ae0] - [ErrorID: c3837664-af65-4d1f-afc9-979753211f07] - Критична помилка при пошуку книги за UUID. Контекст: uuidInput='abc'.
+java.lang.IllegalArgumentException: Invalid UUID string: abc
+	at java.base/java.util.UUID.fromString1(UUID.java:280)
+	at java.base/java.util.UUID.fromString(UUID.java:258)
+	at org.example.Driver.searchAndDisplayByUUID(Driver.java:637)
+	at org.example.Driver.showSearchMenu(Driver.java:613)
+	at org.example.Driver.menu(Driver.java:152)
+	at org.example.Driver.main(Driver.java:95)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:104)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at org.codehaus.mojo.exec.AbstractExecJavaBase.executeMainMethod(AbstractExecJavaBase.java:402)
+	at org.codehaus.mojo.exec.ExecJavaMojo.executeMainMethod(ExecJavaMojo.java:142)
+	at org.codehaus.mojo.exec.AbstractExecJavaBase.doExecClassLoader(AbstractExecJavaBase.java:377)
+	at org.codehaus.mojo.exec.AbstractExecJavaBase.lambda$execute$0(AbstractExecJavaBase.java:287)
+	at java.base/java.lang.Thread.run(Thread.java:1474)
+[2026-03-27 23:22:10] [INFO ] [org.example.Driver] [Admin] [e3229e5e-e933-4c6f-bb61-0d661f042ae0] - Дані бібліотеки успішно збережено.
+[2026-03-27 23:22:10] [INFO ] [org.example.Driver] [Admin] [e3229e5e-e933-4c6f-bb61-0d661f042ae0] - Програму завершено.

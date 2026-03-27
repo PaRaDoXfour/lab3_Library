@@ -3,20 +3,26 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>[%d{yyyy-MM-dd HH:mm:ss}] [%-5level] [%logger{36}] - %msg %nopex%n</pattern>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss}] [%-5level] [%logger{36}] [%X{user}] [%X{sessionId}] - %msg %nopex%n</pattern>
         </encoder>
     </appender>
 
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+    <!-- Ротація за часом та розміром: старі логи стискаються в .gz для економії місця -->
+    <appender name="ROLLING_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>./logs/app.log</file>
         <append>true</append>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- Ротація щодня або при досягненні 10MB -->
+            <fileNamePattern>./logs/app-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>10MB</maxFileSize>
+        </rollingPolicy>
         <encoder>
-            <pattern>[%d{yyyy-MM-dd HH:mm:ss}] [%-5level] [%logger{36}] - %msg%n%ex</pattern>
+            <pattern>[%d{yyyy-MM-dd HH:mm:ss}] [%-5level] [%logger{36}] [%X{user}] [%X{sessionId}] - %msg%n%ex</pattern>
         </encoder>
     </appender>
 
     <root level="${LOG_LEVEL}">
         <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="ROLLING_FILE" />
     </root>
 </configuration>

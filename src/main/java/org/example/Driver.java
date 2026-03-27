@@ -27,6 +27,9 @@ public class Driver {
      * @param args Аргументи командного рядка (не використовуються).
      */
     public static void main(String[] args) {
+        org.slf4j.MDC.put("user", "Admin");
+        org.slf4j.MDC.put("sessionId", UUID.randomUUID().toString());
+
         log.debug("Детальна інформація про стан системи: старт main(), ініціалізація компонентів.");
         log.info("Запуск програми Library_project.");
         Scanner scanner = new Scanner(System.in);
@@ -70,18 +73,21 @@ public class Driver {
             System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
             log.error("[ErrorID: {}] - Критична помилка при ініціалізації бібліотеки. Контекст: operation='main:initLibrary'.",
                     errorId, e);
+            org.slf4j.MDC.clear();
             return;
         } catch (IOException e) {
             String errorId = UUID.randomUUID().toString();
             System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
             log.error("[ErrorID: {}] - Критична помилка при стартовому читанні даних. Контекст: operation='main:startupRead', inputFile='input.txt'.",
                     errorId, e);
+            org.slf4j.MDC.clear();
             return;
         } catch (Exception e) {
             String errorId = UUID.randomUUID().toString();
             System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
             log.error("[ErrorID: {}] - Критична помилка при старті програми. Контекст: operation='main:startup', args='{}'.",
                     errorId, Arrays.toString(args), e);
+            org.slf4j.MDC.clear();
             return;
         }
 
@@ -104,6 +110,7 @@ public class Driver {
         } finally {
             scanner.close();
             log.info("Програму завершено.");
+            org.slf4j.MDC.clear();
         }
     }
 
