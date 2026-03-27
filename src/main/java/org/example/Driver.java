@@ -19,7 +19,22 @@ import java.util.*;
  */
 public class Driver {
     private static Logger log = LoggerFactory.getLogger(Driver.class);
-    private static final String USER_FRIENDLY_ERROR_MSG = "Виникла помилка. Зверніться до підтримки та вкажіть ID: ";
+    /**
+     * Відображає локалізоване користувацьке повідомлення про помилку з інструкціями.
+     */
+    private static void showUserFriendlyError(String errorKey, String errorId) {
+        ResourceBundle messages = ResourceBundle.getBundle("messages", Locale.getDefault());
+        String desc = messages.getString(errorKey + ".desc");
+        String inst = messages.getString(errorKey + ".inst");
+        String feedbackTemplate = messages.getString("error.feedback");
+        String feedback = java.text.MessageFormat.format(feedbackTemplate, errorId);
+
+        System.out.println("\n--- ПОМИЛКА ---");
+        System.out.println(desc);
+        System.out.println(inst);
+        System.out.println(feedback);
+        System.out.println("----------------\n");
+    }
 
     /**
      * Основний метод програми. Виводить та обробляє вибір користувача.
@@ -62,30 +77,30 @@ public class Driver {
                     library.addNewBook(book, 1); // Додаємо по одній книзі кожного типу
                 } catch (Exception e) {
                     String errorId = UUID.randomUUID().toString();
-                    System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-                    log.error("[ErrorID: {}] - Критична помилка при імпорті книги. Контекст: title='{}', operation='addNewBook', quantity={}.",
+                    showUserFriendlyError("error.import.book", errorId);
+                    log.error("[ErrorID: {}] - Critical error during book import. Контекст: title='{}', operation='addNewBook', quantity={}.",
                             errorId, book.getTitle(), 1, e);
                 }
             }
             log.debug("Завантажено {} книг з файлу.", booksFromFile.size());
         } catch (LibraryNameException | LibraryAddressException e) {
             String errorId = UUID.randomUUID().toString();
-            System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-            log.error("[ErrorID: {}] - Критична помилка при ініціалізації бібліотеки. Контекст: operation='main:initLibrary'.",
+            showUserFriendlyError("error.init.library", errorId);
+            log.error("[ErrorID: {}] - Critical error during library initialization. Контекст: operation='main:initLibrary'.",
                     errorId, e);
             org.slf4j.MDC.clear();
             return;
         } catch (IOException e) {
             String errorId = UUID.randomUUID().toString();
-            System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-            log.error("[ErrorID: {}] - Критична помилка при стартовому читанні даних. Контекст: operation='main:startupRead', inputFile='input.txt'.",
+            showUserFriendlyError("error.startup.read", errorId);
+            log.error("[ErrorID: {}] - Critical error during startup data read. Контекст: operation='main:startupRead', inputFile='input.txt'.",
                     errorId, e);
             org.slf4j.MDC.clear();
             return;
         } catch (Exception e) {
             String errorId = UUID.randomUUID().toString();
-            System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-            log.error("[ErrorID: {}] - Критична помилка при старті програми. Контекст: operation='main:startup', args='{}'.",
+            showUserFriendlyError("error.general", errorId);
+            log.error("[ErrorID: {}] - Critical error during application startup. Контекст: operation='main:startup', args='{}'.",
                     errorId, Arrays.toString(args), e);
             org.slf4j.MDC.clear();
             return;
@@ -99,13 +114,13 @@ public class Driver {
             log.info("Дані бібліотеки успішно збережено.");
         } catch (IOException e) {
             String errorId = UUID.randomUUID().toString();
-            System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-            log.error("[ErrorID: {}] - Критична помилка при збереженні даних. Контекст: operation='main:saveBooks', library='{}'.",
+            showUserFriendlyError("error.save.books", errorId);
+            log.error("[ErrorID: {}] - Critical error during data save. Контекст: operation='main:saveBooks', library='{}'.",
                     errorId, library.getName(), e);
         } catch (Exception e) {
             String errorId = UUID.randomUUID().toString();
-            System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-            log.error("[ErrorID: {}] - Критична помилка при завершальній обробці. Контекст: operation='main:shutdown', library='{}'.",
+            showUserFriendlyError("error.general", errorId);
+            log.error("[ErrorID: {}] - Critical error during shutdown processing. Контекст: operation='main:shutdown', library='{}'.",
                     errorId, library.getName(), e);
         } finally {
             scanner.close();
@@ -174,8 +189,8 @@ public class Driver {
                 }
             } catch (LibraryException e) {
                 String errorId = UUID.randomUUID().toString();
-                System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-                log.error("[ErrorID: {}] - Критична помилка при обробці головного меню. Контекст: choice={}, library='{}'.",
+                showUserFriendlyError("error.menu", errorId);
+                log.error("[ErrorID: {}] - Critical error during main menu processing. Контекст: choice={}, library='{}'.",
                         errorId, choice, library.getName(), e);
             }
         } while (choice != 8);
@@ -224,8 +239,8 @@ public class Driver {
                 }
             } catch (LibraryException e) {
                 String errorId = UUID.randomUUID().toString();
-                System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-                log.error("[ErrorID: {}] - Критична помилка при операції видачі/повернення. Контекст: choice={}, library='{}'.",
+                showUserFriendlyError("error.loan", errorId);
+                log.error("[ErrorID: {}] - Critical error during loan/return operation. Контекст: choice={}, library='{}'.",
                         errorId, choice, library.getName(), e);
             }
         } while (choice != 4);
@@ -646,8 +661,8 @@ public class Driver {
             }
         } catch (Exception e) {
             String errorId = UUID.randomUUID().toString();
-            System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-            log.error("[ErrorID: {}] - Критична помилка при пошуку книги за UUID. Контекст: uuidInput='{}'.",
+            showUserFriendlyError("error.uuid.search", errorId);
+            log.error("[ErrorID: {}] - Critical error during UUID search. Контекст: uuidInput='{}'.",
                     errorId, uuidString, e);
         }
     }
@@ -863,8 +878,8 @@ public class Driver {
             System.out.println("Помилка введення даних: " + e.getMessage());
         } catch (Exception e) {
             String errorId = UUID.randomUUID().toString();
-            System.out.println(USER_FRIENDLY_ERROR_MSG + errorId);
-            log.error("[ErrorID: {}] - Критична помилка при додаванні електронної книги. Контекст: operation='addEBook', quantity={}.",
+            showUserFriendlyError("error.general", errorId);
+            log.error("[ErrorID: {}] - Critical error during eBook addition. Контекст: operation='addEBook', quantity={}.",
                     errorId, quantity, e);
         }
     }
