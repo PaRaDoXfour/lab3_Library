@@ -1,0 +1,14 @@
+[2026-03-27 18:53:59] [INFO ] [org.example.Driver] - Запуск програми Library_project.
+[2026-03-27 18:53:59] [DEBUG] [org.example.Driver] - Початок завантаження бібліотеки з файлу.
+[2026-03-27 18:53:59] [DEBUG] [org.example.FileHandler] - Зчитування даних бібліотеки з файлу 'input.txt'.
+[2026-03-27 18:53:59] [INFO ] [org.example.Driver] - Бібліотеку 'Центральна міська бібліотека' успішно завантажено з файлу.
+[2026-03-27 18:53:59] [DEBUG] [org.example.Driver] - Початок завантаження книг з файлу.
+[2026-03-27 18:53:59] [DEBUG] [org.example.FileHandler] - Зчитування книг з файлу 'input.txt'.
+[2026-03-27 18:53:59] [DEBUG] [org.example.FileHandler] - З файлу 'input.txt' зчитано 7 книг.
+[2026-03-27 18:53:59] [DEBUG] [org.example.Driver] - Завантажено 7 книг з файлу.
+[2026-03-27 18:53:59] [DEBUG] [org.example.Driver] - Обрано пункт головного меню: 8
+[2026-03-27 18:53:59] [DEBUG] [org.example.Driver] - Початок збереження даних бібліотеки у файл.
+[2026-03-27 18:53:59] [DEBUG] [org.example.FileHandler] - Збереження 7 книг у файл 'input.txt'.
+[2026-03-27 18:53:59] [DEBUG] [org.example.FileHandler] - Збереження у файл 'input.txt' завершено успішно.
+[2026-03-27 18:53:59] [INFO ] [org.example.Driver] - Дані бібліотеки успішно збережено.
+[2026-03-27 18:53:59] [INFO ] [org.example.Driver] - Програму завершено.

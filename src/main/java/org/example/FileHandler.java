@@ -1,13 +1,16 @@
 package org.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Map;
 
 /**
  * Клас для роботи з файлами - читання та запис даних.
  */
 public class FileHandler {
+    private static Logger log = LoggerFactory.getLogger(FileHandler.class);
     // Ім'я файлу для зберігання даних
     private static final String FILE_NAME = "input.txt";
 
@@ -24,9 +27,11 @@ public class FileHandler {
     public static Library readLibraryFromFile() throws IOException, InvalidDataException, LibraryNameException, LibraryAddressException {
         File file = new File(FILE_NAME);
         if (!file.exists() || file.length() == 0) {
+            log.debug("Файл '{}' не існує або порожній: бібліотеку не завантажено.", FILE_NAME);
             return null;
         }
 
+        log.debug("Зчитування даних бібліотеки з файлу '{}'.", FILE_NAME);
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -64,10 +69,12 @@ public class FileHandler {
 
         // Якщо файл не існує або порожній, повертаємо пустий список
         if (!file.exists() || file.length() == 0) {
+            log.debug("Файл '{}' не існує або порожній: список книг порожній.", FILE_NAME);
             return books;
         }
 
         // Використовуємо try-with-resources для автоматичного закриття потоку
+        log.debug("Зчитування книг з файлу '{}'.", FILE_NAME);
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
 
@@ -88,6 +95,7 @@ public class FileHandler {
                 }
             }
         }
+        log.debug("З файлу '{}' зчитано {} книг.", FILE_NAME, books.size());
         return books;
     }
 
@@ -128,11 +136,11 @@ public class FileHandler {
                     int firstPrintYear = Integer.parseInt(readNonNullLine(reader));
                     return new RareBook(title, author, year, isbn, pages, genre, rareHardcover, value, firstPrintYear);
                 default:
-                    System.err.println("Невідомий тип книги: " + type);
+                    log.error("Невідомий тип книги в файлі: {}", type);
                     return null;
             }
         } catch (Exception e) {
-            System.err.println("Помилка при читанні даних книги: " + e.getMessage());
+            log.error("Помилка при читанні даних книги типу {}.", type, e);
             return null;
         }
     }
@@ -172,15 +180,13 @@ public class FileHandler {
      *                     [Пустий рядок]
      */
     public static void saveBooksToFile(Library library, ArrayList<Book> books) throws IOException, InvalidDataException {
+        log.debug("Збереження {} книг у файл '{}'.", books.size(), FILE_NAME);
         try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME))) {
             // Спочатку зберігаємо дані бібліотеки
             writer.println("[Library]");
             writer.println(library.getName());
             writer.println(library.getAddress());
             writer.println(); // Пустий рядок для відокремлення
-
-            // Зберігаємо тільки книги, які ще є в бібліотеці
-            Map<Book, Integer> currentBooks = library.getAllBooks();
 
             for (Book book : books) {
                 // Визначаємо тип книги та записуємо відповідні дані
@@ -236,5 +242,6 @@ public class FileHandler {
                 writer.println();
             }
         }
+        log.debug("Збереження у файл '{}' завершено успішно.", FILE_NAME);
     }
 }

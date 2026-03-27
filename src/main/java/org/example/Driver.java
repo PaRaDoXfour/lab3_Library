@@ -11,6 +11,9 @@ package org.example;/*
 Використання ШІ:Ні
 */
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Year;
@@ -20,64 +23,82 @@ import java.util.*;
 /**
  * Клас Driver керує взаємодією користувача з бібліотекою книг.
  * Дозволяє додавати нові книги різних типів, переглядати список книг, шукати книги та завершувати програму.
+ * Логування: DEBUG для допоміжних кроків меню/вводу/файлів, INFO для запуску/завершення та ключових дій,
+ * ERROR для винятків у критичних операціях.
  */
 public class Driver {
+    private static Logger log = LoggerFactory.getLogger(Driver.class);
 
     /**
-     * Основнеий метод програми. Виводить та обробляє вибір користувача.
+     * Основний метод програми. Виводить та обробляє вибір користувача.
      *
      * @param args Аргументи командного рядка (не використовуються).
      */
     public static void main(String[] args) {
+        log.info("Запуск програми Library_project.");
         Scanner scanner = new Scanner(System.in);
         Library library;
 
         try {
             // Завантажуємо бібліотеку з файлу
+            log.debug("Початок завантаження бібліотеки з файлу.");
             Library loadedLibrary = FileHandler.readLibraryFromFile();
             if (loadedLibrary != null) {
                 library = loadedLibrary;
                 System.out.println("Дані бібліотеки успішно завантажено з файлу.");
                 System.out.println("Name: " + library.getName());
                 System.out.println("Address: " + library.getAddress());
+                log.info("Бібліотеку '{}' успішно завантажено з файлу.", library.getName());
             } else {
                 // Якщо бібліотеки немає у файлі - створюємо нову
                 System.out.println("Створення нової бібліотеки:");
                 String name = readNonEmptyString(scanner, "Назва бібліотеки: ");
                 String address = readNonEmptyString(scanner, "Адреса бібліотеки: ");
                 library = new Library(name, address);
+                log.info("Створено нову бібліотеку '{}'.", name);
             }
 
             // Завантажуємо книги з файлу
+            log.debug("Початок завантаження книг з файлу.");
             ArrayList<Book> booksFromFile = FileHandler.readBooksFromFile();
             for (Book book : booksFromFile) {
                 try {
                     library.addNewBook(book, 1); // Додаємо по одній книзі кожного типу
                 } catch (Exception e) {
                     System.out.println("Помилка при додаванні книги: " + e.getMessage());
+                    log.error("Помилка при імпорті книги '{}' із файлу.", book.getTitle(), e);
                 }
             }
+            log.debug("Завантажено {} книг з файлу.", booksFromFile.size());
         } catch (LibraryNameException | LibraryAddressException e) {
             System.out.println("Помилка при створенні бібліотеки: " + e.getMessage());
+            log.error("Помилка при ініціалізації бібліотеки.", e);
             return;
         } catch (IOException e) {
             System.out.println("Помилка при роботі з файлом: " + e.getMessage());
+            log.error("Помилка вводу/виводу під час старту програми.", e);
             return;
         } catch (Exception e) {
             System.out.println("Невідома помилка: " + e.getMessage());
+            log.error("Невідома критична помилка під час старту програми.", e);
             return;
         }
 
         try {
             menu(scanner, library);
+            log.debug("Початок збереження даних бібліотеки у файл.");
             FileHandler.saveBooksToFile(library, new ArrayList<>(library.getAllBooks().keySet()));
             System.out.println("Дані успішно збережено у файл.");
+            log.info("Дані бібліотеки успішно збережено.");
         } catch (IOException e) {
             System.out.println("Помилка при збереженні даних: " + e.getMessage());
+            log.error("Помилка при збереженні даних у файл.", e);
         } catch (Exception e) {
             System.out.println("Невідома помилка: " + e.getMessage());
+            log.error("Невідома помилка під час завершальної обробки.", e);
         } finally {
             scanner.close();
+            log.info("Програму завершено.");
         }
     }
 
@@ -106,8 +127,10 @@ public class Driver {
                 choice = input.isEmpty() ? -1 : Integer.parseInt(input);
             } catch (NumberFormatException e) {
                 choice = -1;
+                log.debug("Некоректний формат вводу в головному меню: '{}'.", input);
             }
 
+            log.debug("Обрано пункт головного меню: {}", choice);
             try {
                 switch (choice) {
                     case 1:
@@ -139,6 +162,7 @@ public class Driver {
                 }
             } catch (LibraryException e) {
                 System.out.println("Помилка: " + e.getMessage());
+                log.error("Помилка бізнес-логіки у головному меню.", e);
             }
         } while (choice != 8);
     }
@@ -164,8 +188,10 @@ public class Driver {
                 choice = input.isEmpty() ? -1 : Integer.parseInt(input);
             } catch (NumberFormatException e) {
                 choice = -1;
+                log.debug("Некоректний формат вводу в меню видачі/повернення: '{}'.", input);
             }
 
+            log.debug("Обрано пункт меню видачі/повернення: {}", choice);
             try {
                 switch (choice) {
                     case 1:
@@ -184,6 +210,7 @@ public class Driver {
                 }
             } catch (LibraryException e) {
                 System.out.println("Помилка: " + e.getMessage());
+                log.error("Помилка в операціях видачі/повернення.", e);
             }
         } while (choice != 4);
     }
@@ -603,6 +630,7 @@ public class Driver {
             }
         } catch (Exception e) {
             System.out.println("Помилка: невідомий формат UUID.");
+            log.error("Введено невалідний UUID: '{}'.", uuidString, e);
         }
     }
 
@@ -952,9 +980,11 @@ public class Driver {
                 value = Integer.parseInt(scanner.nextLine());
                 if (value < min || value > max) {
                     System.out.println("Помилка: Введене число має бути в межах " + min + "-" + max);
+                    log.debug("Число поза межами [{}-{}]: {}", min, max, value);
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Помилка: Введіть коректне число.");
+                log.debug("Не вдалося розпарсити ціле число у readValidInt.", e);
             }
         }
         return value;
@@ -977,9 +1007,11 @@ public class Driver {
                 value = Double.parseDouble(scanner.nextLine());
                 if (value <= min || value > max) {
                     System.out.println("Помилка: Введене число має бути в межах " + min + "-" + max);
+                    log.debug("Число з плаваючою точкою поза межами ({}-{}]: {}", min, max, value);
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Помилка: Введіть коректне число.");
+                log.debug("Не вдалося розпарсити число з плаваючою точкою у readValidDouble.", e);
             }
         }
         return value;
