@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 public class Library {
     private static Logger log = LoggerFactory.getLogger(Library.class);
     private final Map<Book, Integer> bookInventory;
+    private final Map<UUID, Book> bookByIdIndex;
     private final List<LoanRecord> loanRecords;
     private UUID id;
     private String name;
@@ -30,6 +31,7 @@ public class Library {
         setName(name);
         setAddress(address);
         this.bookInventory = new HashMap<>();
+        this.bookByIdIndex = new HashMap<>();
         this.loanRecords = new ArrayList<>();
     }
 
@@ -125,10 +127,7 @@ public class Library {
      * @return Знайдена книга або null, якщо не знайдено
      */
     public Book searchByUUID(UUID uuid) {
-        return bookInventory.keySet().stream()
-                .filter(book -> book.getId().equals(uuid))
-                .findFirst()
-                .orElse(null);
+        return bookByIdIndex.get(uuid);
     }
 
     /**
@@ -159,7 +158,11 @@ public class Library {
      * @return true, якщо книга була успішно видалена, false якщо ні
      */
     public boolean delete(Book bookToDelete) {
-        return bookInventory.keySet().remove(bookToDelete);
+        if (bookInventory.keySet().remove(bookToDelete)) {
+            bookByIdIndex.remove(bookToDelete.getId());
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -184,9 +187,14 @@ public class Library {
 
         // Видаляємо стару книгу
         bookInventory.remove(existingObject);
+        if (existingObject.getId() != null) {
+            bookByIdIndex.remove(existingObject.getId());
+        }
 
         // Додаємо оновлену книгу з тією ж кількістю
-        bookInventory.put(createBookCopy(newObject), quantity);
+        Book newCopy = createBookCopy(newObject);
+        bookInventory.put(newCopy, quantity);
+        bookByIdIndex.put(newCopy.getId(), newCopy);
 
         return true;
     }
@@ -218,6 +226,7 @@ public class Library {
 
 
         bookInventory.put(bookCopy, quantity);
+        bookByIdIndex.put(bookCopy.getId(), bookCopy);
         return true;
     }
 

@@ -26,30 +26,22 @@ public class DataGenerator {
 
             // Generate 100,000 books
             for (int i = 1; i <= bookCount; i++) {
-                writer.write("[PaperBook]\n");
-                writer.write("Test Book Title " + i + "\n");
-                writer.write("Test Author " + i + "\n");
-                
+                String title = "Test Book Title " + i;
+                String author = "Test Author " + i;
                 int year = 1900 + random.nextInt(124); // Year 1900-2023
-                writer.write(year + "\n");
+                String isbn = String.format("978-%02d-%06d-%d", random.nextInt(100), i, random.nextInt(10));
                 
-                // Unique ID (ISBN format)
-                writer.write(String.format("978-%02d-%06d-%d\n", random.nextInt(100), i, random.nextInt(10))); 
+                // Add an occasional invalid ISBN for the warning log test
+                if (random.nextInt(100) == 0) {
+                    isbn = "INVALID-ISBN-" + i;
+                }
                 
                 int pages = 50 + random.nextInt(950); // 50-999 pages
-                writer.write(pages + "\n");
-                
                 String genre = GENRES[random.nextInt(GENRES.length)];
-                writer.write(genre + "\n");
-                
-                // Random availability (true/false)
-                writer.write(random.nextBoolean() + "\n"); 
-                
-                // Add an empty line between entries except for the last one
-                if (i < bookCount) {
-                    writer.write("\n");
-                }
+                boolean hardcover = random.nextBoolean();
 
+                writer.write("[PaperBook]|" + title + "|" + author + "|" + year + "|" + isbn + "|" + pages + "|" + genre + "|" + hardcover + "\n");
+                
                 // Progress update
                 if (i % 10000 == 0) {
                     System.out.println("Generated " + i + " books...");

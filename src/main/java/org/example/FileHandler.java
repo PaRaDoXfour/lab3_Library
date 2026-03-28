@@ -39,8 +39,14 @@ public class FileHandler {
             while ((line = reader.readLine()) != null) {
                 line = line.trim();
                 if (line.equals("[Library]")) {
-                    String name = readNonNullLine(reader);
-                    String address = readNonNullLine(reader);
+                    String name = reader.readLine();
+                    if (name == null) throw new IOException("Unexpected end of file");
+                    name = name.trim();
+
+                    String address = reader.readLine();
+                    if (address == null) throw new IOException("Unexpected end of file");
+                    address = address.trim();
+
                     return new Library(name, address);
                 }
             }
@@ -85,15 +91,22 @@ public class FileHandler {
                 line = line.trim();
 
                 // Пропускаємо порожні рядки та інформацію про бібліотеку
-                if (line.isEmpty() || line.equals("[Library]")) {
-                    continue; // Пропускаємо пусті рядки та блок бібліотеки
+                if (line.isEmpty() || line.startsWith("[Library]") || !line.startsWith("[")) {
+                    continue;
                 }
 
-                if (line.startsWith("[")) { // Початок блоку книги
-                    Book book = readBookData(reader, line);
+                try {
+                    Book book = readBookData(line);
                     if (book != null) {
+                        // Validate ISBN format
+                        if (!book.getIsbn().matches("978-\\d{2}-\\d{6}-\\d")) {
+                            log.warn("Пропущено запис з недійсним форматом ISBN: {}", book.getIsbn());
+                            continue;
+                        }
                         books.add(book);
                     }
+                } catch (Exception e) {
+                    log.warn("Помилка парсингу рядка книги (пропущено): {}", line, e);
                 }
             }
         }
@@ -102,70 +115,49 @@ public class FileHandler {
     }
 
     /**
-     * Допоміжний метод для читання даних конкретної книги.
+     * Допоміжний метод для читання даних конкретної книги з одного рядка.
+     * Використовує StringTokenizer для оптимізації без регулярних виразів.
      *
-     * @param reader BufferedReader для читання даних
-     * @param type   тип книги (визначає формат даних)
-     * @return об'єкт Book або null, якщо виникла помилка
-     * @throws IOException якщо виникають проблеми з читанням даних
+     * @param rowData рядок з файлу
+     * @return об'єкт Book
+     * @throws Exception якщо виникають проблеми з читанням даних
      */
-    private static Book readBookData(BufferedReader reader, String type) throws IOException {
-        try {
-            // Читаємо спільні для всіх книг поля
-            String title = readNonNullLine(reader);
-            String author = readNonNullLine(reader);
-            int year = Integer.parseInt(readNonNullLine(reader));
-            String isbn = readNonNullLine(reader);
-            int pages = Integer.parseInt(readNonNullLine(reader));
-            Genre genre = Genre.valueOf(readNonNullLine(reader));
+    private static Book readBookData(String rowData) throws Exception {
+        java.util.StringTokenizer tokenizer = new java.util.StringTokenizer(rowData, "|");
+        if (!tokenizer.hasMoreTokens()) return null;
 
-            // Залежно від типу книги читаємо додаткові поля
-            switch (type) {
-                case "[EBook]":
-                    EBookFormat format = EBookFormat.valueOf(readNonNullLine(reader));
-                    double size = Double.parseDouble(readNonNullLine(reader));
-                    return new EBook(title, author, year, isbn, pages, genre, format, size);
-                case "[PaperBook]":
-                    boolean hardcover = Boolean.parseBoolean(readNonNullLine(reader));
-                    return new PaperBook(title, author, year, isbn, pages, genre, hardcover);
-                case "[Audiobook]":
-                    double duration = Double.parseDouble(readNonNullLine(reader));
-                    String narrator = readNonNullLine(reader);
-                    return new Audiobook(title, author, year, isbn, pages, genre, duration, narrator);
-                case "[RareBook]":
-                    boolean rareHardcover = Boolean.parseBoolean(readNonNullLine(reader));
-                    int value = Integer.parseInt(readNonNullLine(reader));
-                    int firstPrintYear = Integer.parseInt(readNonNullLine(reader));
-                    return new RareBook(title, author, year, isbn, pages, genre, rareHardcover, value, firstPrintYear);
-                default:
-                    String errorId = UUID.randomUUID().toString();
-                    log.error(
-                            "[ErrorID: {}] - Критична помилка при читанні типу книги. Контекст: operation='readBookData', file='{}', type='{}'.",
-                            errorId, FILE_NAME, type);
-                    return null;
-            }
-        } catch (Exception e) {
-            String errorId = UUID.randomUUID().toString();
-            log.error(
-                    "[ErrorID: {}] - Критична помилка при парсингу книги. Контекст: operation='readBookData', file='{}', type='{}'.",
-                    errorId, FILE_NAME, type, e);
-            return null;
-        }
-    }
+        String type = tokenizer.nextToken().trim().intern();
+        String title = tokenizer.nextToken().trim(); // Titles are generally unique, avoids bloating String pool
+        String author = tokenizer.nextToken().trim().intern();
+        int year = Integer.parseInt(tokenizer.nextToken().trim());
+        String isbn = tokenizer.nextToken().trim();
+        int pages = Integer.parseInt(tokenizer.nextToken().trim());
+        Genre genre = Genre.valueOf(tokenizer.nextToken().trim());
 
-    /**
-     * Допоміжний метод для читання рядка з перевіркою на null.
-     *
-     * @param reader BufferedReader для читання даних
-     * @return рядок без зайвих пробілів
-     * @throws IOException якщо досягнуто кінець файлу
-     */
-    private static String readNonNullLine(BufferedReader reader) throws IOException {
-        String line = reader.readLine();
-        if (line == null) {
-            throw new IOException("Неочікуваний кінець файлу");
+        switch (type) {
+            case "[EBook]":
+                EBookFormat format = EBookFormat.valueOf(tokenizer.nextToken().trim());
+                double size = Double.parseDouble(tokenizer.nextToken().trim());
+                return new EBook(title, author, year, isbn, pages, genre, format, size);
+            case "[PaperBook]":
+                boolean hardcover = Boolean.parseBoolean(tokenizer.nextToken().trim());
+                return new PaperBook(title, author, year, isbn, pages, genre, hardcover);
+            case "[Audiobook]":
+                double duration = Double.parseDouble(tokenizer.nextToken().trim());
+                String narrator = tokenizer.nextToken().trim().intern();
+                return new Audiobook(title, author, year, isbn, pages, genre, duration, narrator);
+            case "[RareBook]":
+                boolean rareHardcover = Boolean.parseBoolean(tokenizer.nextToken().trim());
+                int value = Integer.parseInt(tokenizer.nextToken().trim());
+                int firstPrintYear = Integer.parseInt(tokenizer.nextToken().trim());
+                return new RareBook(title, author, year, isbn, pages, genre, rareHardcover, value, firstPrintYear);
+            default:
+                String errorId = UUID.randomUUID().toString();
+                log.error(
+                        "[ErrorID: {}] - Критична помилка при читанні типу книги. Контекст: operation='readBookData', file='{}', type='{}'.",
+                        errorId, FILE_NAME, type);
+                return null;
         }
-        return line.trim();
     }
 
     /**
@@ -173,25 +165,13 @@ public class FileHandler {
      *
      * @param books список книг для збереження
      * @throws IOException якщо виникнуть проблеми з записом у файл
-     *                     <p>
-     *                     </p>
-     *                     <br>
      *                     Формат запису:
-     *                     Кожна книга зберігається у вигляді послідовності рядків:
-     *                     [ТипКниги]
-     *                     Назва
-     *                     Автор
-     *                     Рік
-     *                     ISBN
-     *                     Сторінки
-     *                     Жанр
-     *                     [Додаткові поля залежно від типу]
-     *                     [Пустий рядок]
+     *                     Кожна книга зберігається у вигляді одного рядка розділеного пайпами '|'
      */
     public static void saveBooksToFile(Library library, ArrayList<Book> books)
             throws IOException, InvalidDataException {
         log.debug("Збереження {} книг у файл '{}'.", books.size(), FILE_NAME);
-        try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME))) {
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(FILE_NAME)))) {
             // Спочатку зберігаємо дані бібліотеки
             writer.println("[Library]");
             writer.println(library.getName());
@@ -199,57 +179,38 @@ public class FileHandler {
             writer.println(); // Пустий рядок для відокремлення
 
             for (Book book : books) {
-                // Визначаємо тип книги та записуємо відповідні дані
-                switch (book) {
-                    case RareBook rareBook -> {
-                        writer.println("[RareBook]");
-                        writer.println(rareBook.getTitle());
-                        writer.println(rareBook.getAuthor());
-                        writer.println(rareBook.getYear());
-                        writer.println(rareBook.getIsbn());
-                        writer.println(rareBook.getPages());
-                        writer.println(rareBook.getGenre());
-                        writer.println(rareBook.getHardcover());
-                        writer.println(rareBook.getEstimatedValue());
-                        writer.println(rareBook.getFirstPrintYear().getValue());
-                    }
-                    case EBook eBook -> {
-                        writer.println("[EBook]");
-                        writer.println(eBook.getTitle());
-                        writer.println(eBook.getAuthor());
-                        writer.println(eBook.getYear());
-                        writer.println(eBook.getIsbn());
-                        writer.println(eBook.getPages());
-                        writer.println(eBook.getGenre());
-                        writer.println(eBook.getFileFormat());
-                        writer.println(eBook.getFileSize());
-                    }
-                    case Audiobook audiobook -> {
-                        writer.println("[Audiobook]");
-                        writer.println(audiobook.getTitle());
-                        writer.println(audiobook.getAuthor());
-                        writer.println(audiobook.getYear());
-                        writer.println(audiobook.getIsbn());
-                        writer.println(audiobook.getPages());
-                        writer.println(audiobook.getGenre());
-                        writer.println(audiobook.getDuration());
-                        writer.println(audiobook.getNarrator());
-                    }
-                    case PaperBook paperBook -> {
-                        writer.println("[PaperBook]");
-                        writer.println(paperBook.getTitle());
-                        writer.println(paperBook.getAuthor());
-                        writer.println(paperBook.getYear());
-                        writer.println(paperBook.getIsbn());
-                        writer.println(paperBook.getPages());
-                        writer.println(paperBook.getGenre());
-                        writer.println(paperBook.getHardcover());
-                    }
-                    default -> throw new IllegalStateException("Unexpected value: " + book);
+                StringBuilder sb = new StringBuilder();
+                if (book instanceof RareBook) {
+                    RareBook rareBook = (RareBook) book;
+                    sb.append("[RareBook]|").append(rareBook.getTitle()).append("|")
+                      .append(rareBook.getAuthor()).append("|").append(rareBook.getYear()).append("|")
+                      .append(rareBook.getIsbn()).append("|").append(rareBook.getPages()).append("|")
+                      .append(rareBook.getGenre()).append("|").append(rareBook.getHardcover()).append("|")
+                      .append(rareBook.getEstimatedValue()).append("|").append(rareBook.getFirstPrintYear().getValue());
+                } else if (book instanceof EBook) {
+                    EBook eBook = (EBook) book;
+                    sb.append("[EBook]|").append(eBook.getTitle()).append("|")
+                      .append(eBook.getAuthor()).append("|").append(eBook.getYear()).append("|")
+                      .append(eBook.getIsbn()).append("|").append(eBook.getPages()).append("|")
+                      .append(eBook.getGenre()).append("|").append(eBook.getFileFormat()).append("|")
+                      .append(eBook.getFileSize());
+                } else if (book instanceof Audiobook) {
+                    Audiobook audiobook = (Audiobook) book;
+                    sb.append("[Audiobook]|").append(audiobook.getTitle()).append("|")
+                      .append(audiobook.getAuthor()).append("|").append(audiobook.getYear()).append("|")
+                      .append(audiobook.getIsbn()).append("|").append(audiobook.getPages()).append("|")
+                      .append(audiobook.getGenre()).append("|").append(audiobook.getDuration()).append("|")
+                      .append(audiobook.getNarrator());
+                } else if (book instanceof PaperBook) {
+                    PaperBook paperBook = (PaperBook) book;
+                    sb.append("[PaperBook]|").append(paperBook.getTitle()).append("|")
+                      .append(paperBook.getAuthor()).append("|").append(paperBook.getYear()).append("|")
+                      .append(paperBook.getIsbn()).append("|").append(paperBook.getPages()).append("|")
+                      .append(paperBook.getGenre()).append("|").append(paperBook.getHardcover());
+                } else {
+                    throw new IllegalStateException("Unexpected value: " + book);
                 }
-
-                // Розділяємо книги пустими рядками
-                writer.println();
+                writer.println(sb.toString());
             }
         }
         log.debug("Збереження у файл '{}' завершено успішно.", FILE_NAME);
