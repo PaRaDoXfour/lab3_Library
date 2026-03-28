@@ -11,16 +11,20 @@ import java.util.*;
 
 /**
  * Клас Driver керує взаємодією користувача з бібліотекою книг.
- * Дозволяє додавати нові книги різних типів, переглядати список книг, шукати книги та завершувати програму.
- * Логування: DEBUG для допоміжних кроків меню/вводу/файлів, INFO для запуску/завершення та ключових дій,
+ * Дозволяє додавати нові книги різних типів, переглядати список книг, шукати
+ * книги та завершувати програму.
+ * Логування: DEBUG для допоміжних кроків меню/вводу/файлів, INFO для
+ * запуску/завершення та ключових дій,
  * ERROR для винятків у критичних операціях.
  * Рівень логування змінюється без перекомпіляції через змінну Logback LOG_LEVEL
  * (змінна оточення або JVM параметр -DLOG_LEVEL=...).
  */
 public class Driver {
     private static Logger log = LoggerFactory.getLogger(Driver.class);
+
     /**
-     * Відображає локалізоване користувацьке повідомлення про помилку з інструкціями.
+     * Відображає локалізоване користувацьке повідомлення про помилку з
+     * інструкціями.
      */
     private static void showUserFriendlyError(String errorKey, String errorId) {
         ResourceBundle messages = ResourceBundle.getBundle("messages", Locale.getDefault());
@@ -71,6 +75,7 @@ public class Driver {
 
             // Завантажуємо книги з файлу
             log.debug("Початок завантаження книг з файлу.");
+            long startTime = System.currentTimeMillis();
             ArrayList<Book> booksFromFile = FileHandler.readBooksFromFile();
             for (Book book : booksFromFile) {
                 try {
@@ -78,29 +83,35 @@ public class Driver {
                 } catch (Exception e) {
                     String errorId = UUID.randomUUID().toString();
                     showUserFriendlyError("error.import.book", errorId);
-                    log.error("[ErrorID: {}] - Critical error during book import. Контекст: title='{}', operation='addNewBook', quantity={}.",
+                    log.error(
+                            "[ErrorID: {}] - Critical error during book import. Контекст: title='{}', operation='addNewBook', quantity={}.",
                             errorId, book.getTitle(), 1, e);
                 }
             }
+            long endTime = System.currentTimeMillis();
+            System.out.println("[INFO] Loaded " + booksFromFile.size() + " books in " + (endTime - startTime) + " ms.");
             log.debug("Завантажено {} книг з файлу.", booksFromFile.size());
         } catch (LibraryNameException | LibraryAddressException e) {
             String errorId = UUID.randomUUID().toString();
             showUserFriendlyError("error.init.library", errorId);
-            log.error("[ErrorID: {}] - Critical error during library initialization. Контекст: operation='main:initLibrary'.",
+            log.error(
+                    "[ErrorID: {}] - Critical error during library initialization. Контекст: operation='main:initLibrary'.",
                     errorId, e);
             org.slf4j.MDC.clear();
             return;
         } catch (IOException e) {
             String errorId = UUID.randomUUID().toString();
             showUserFriendlyError("error.startup.read", errorId);
-            log.error("[ErrorID: {}] - Critical error during startup data read. Контекст: operation='main:startupRead', inputFile='input.txt'.",
+            log.error(
+                    "[ErrorID: {}] - Critical error during startup data read. Контекст: operation='main:startupRead', inputFile='input.txt'.",
                     errorId, e);
             org.slf4j.MDC.clear();
             return;
         } catch (Exception e) {
             String errorId = UUID.randomUUID().toString();
             showUserFriendlyError("error.general", errorId);
-            log.error("[ErrorID: {}] - Critical error during application startup. Контекст: operation='main:startup', args='{}'.",
+            log.error(
+                    "[ErrorID: {}] - Critical error during application startup. Контекст: operation='main:startup', args='{}'.",
                     errorId, Arrays.toString(args), e);
             org.slf4j.MDC.clear();
             return;
@@ -115,12 +126,14 @@ public class Driver {
         } catch (IOException e) {
             String errorId = UUID.randomUUID().toString();
             showUserFriendlyError("error.save.books", errorId);
-            log.error("[ErrorID: {}] - Critical error during data save. Контекст: operation='main:saveBooks', library='{}'.",
+            log.error(
+                    "[ErrorID: {}] - Critical error during data save. Контекст: operation='main:saveBooks', library='{}'.",
                     errorId, library.getName(), e);
         } catch (Exception e) {
             String errorId = UUID.randomUUID().toString();
             showUserFriendlyError("error.general", errorId);
-            log.error("[ErrorID: {}] - Critical error during shutdown processing. Контекст: operation='main:shutdown', library='{}'.",
+            log.error(
+                    "[ErrorID: {}] - Critical error during shutdown processing. Контекст: operation='main:shutdown', library='{}'.",
                     errorId, library.getName(), e);
         } finally {
             scanner.close();
@@ -190,7 +203,8 @@ public class Driver {
             } catch (LibraryException e) {
                 String errorId = UUID.randomUUID().toString();
                 showUserFriendlyError("error.menu", errorId);
-                log.error("[ErrorID: {}] - Critical error during main menu processing. Контекст: choice={}, library='{}'.",
+                log.error(
+                        "[ErrorID: {}] - Critical error during main menu processing. Контекст: choice={}, library='{}'.",
                         errorId, choice, library.getName(), e);
             }
         } while (choice != 8);
@@ -240,7 +254,8 @@ public class Driver {
             } catch (LibraryException e) {
                 String errorId = UUID.randomUUID().toString();
                 showUserFriendlyError("error.loan", errorId);
-                log.error("[ErrorID: {}] - Critical error during loan/return operation. Контекст: choice={}, library='{}'.",
+                log.error(
+                        "[ErrorID: {}] - Critical error during loan/return operation. Контекст: choice={}, library='{}'.",
                         errorId, choice, library.getName(), e);
             }
         } while (choice != 4);
@@ -285,7 +300,8 @@ public class Driver {
         String borrowerName = readNonEmptyString(scanner, "Ім'я позичальника: ");
 
         // Запитуємо дату видачі
-        LocalDate loanDate = readDate(scanner, "Дата видачі (рррр-мм-дд або Enter, за замовчуванням сьогодні): ", LocalDate.now());
+        LocalDate loanDate = readDate(scanner, "Дата видачі (рррр-мм-дд або Enter, за замовчуванням сьогодні): ",
+                LocalDate.now());
 
         // Запитуємо очікувану дату повернення
         LocalDate returnDate = readReturnDate(scanner);
@@ -335,7 +351,8 @@ public class Driver {
         LoanRecord selectedLoan = activeLoans.get(loanChoice - 1);
 
         // Запитуємо фактичну дату повернення
-        LocalDate returnDate = readDate(scanner, "Фактична дата повернення (рррр-мм-дд або Enter, за замовчуванням сьогодні): ", LocalDate.now());
+        LocalDate returnDate = readDate(scanner,
+                "Фактична дата повернення (рррр-мм-дд або Enter, за замовчуванням сьогодні): ", LocalDate.now());
 
         // Виконуємо повернення
         if (library.returnBook(selectedLoan.getRecordId(), returnDate)) {
@@ -373,7 +390,7 @@ public class Driver {
             String input = scanner.nextLine().trim();
 
             if (input.isEmpty()) {
-                return null;  // Користувач не ввів дату - повертаємо null
+                return null; // Користувач не ввів дату - повертаємо null
             }
 
             try {
@@ -417,7 +434,8 @@ public class Driver {
      * @param scanner Об'єкт Scanner для читання вводу
      * @param library Об'єкт Library, що містить колекцію книг
      */
-    private static void showDeleteBookMenu(Scanner scanner, Library library) throws InvalidDataException, BookNotFoundException {
+    private static void showDeleteBookMenu(Scanner scanner, Library library)
+            throws InvalidDataException, BookNotFoundException {
         System.out.println("\nВидалення книги:");
 
         // Отримуємо всі книги з бібліотеки
@@ -529,11 +547,10 @@ public class Driver {
         }
         System.out.println((maxOption + 1) + ". Повернутись до попереднього меню");
 
-
         int attributeChoice = readValidInt(scanner, "Ваш вибір: ", 1,
                 modifiedBook instanceof RareBook ? 10
-                        : modifiedBook instanceof EBook || modifiedBook instanceof Audiobook ? 9 :
-                                modifiedBook instanceof PaperBook ? 8 : 7);
+                        : modifiedBook instanceof EBook || modifiedBook instanceof Audiobook ? 9
+                                : modifiedBook instanceof PaperBook ? 8 : 7);
 
         // Обробка вибору "Повернутись"
         if (attributeChoice == maxOption + 1) {
@@ -567,21 +584,25 @@ public class Driver {
                     } else if (modifiedBook instanceof PaperBook) {
                         ((PaperBook) modifiedBook).setHardcover(readCoverType(scanner));
                     } else if (modifiedBook instanceof Audiobook) {
-                        ((Audiobook) modifiedBook).setDuration(readValidDouble(scanner, "Нова тривалість (год.): ", 0.1, 100));
+                        ((Audiobook) modifiedBook)
+                                .setDuration(readValidDouble(scanner, "Нова тривалість (год.): ", 0.1, 100));
                     }
                     break;
                 case 8:
                     if (modifiedBook instanceof EBook) {
-                        ((EBook) modifiedBook).setFileSize(readValidDouble(scanner, "Новий розмір файлу (MB): ", 0.0, 1000));
+                        ((EBook) modifiedBook)
+                                .setFileSize(readValidDouble(scanner, "Новий розмір файлу (MB): ", 0.0, 1000));
                     } else if (modifiedBook instanceof RareBook) {
-                        ((RareBook) modifiedBook).setEstimatedValue(readValidInt(scanner, "Нова орієнтовна вартість ($): ", 1, Integer.MAX_VALUE));
+                        ((RareBook) modifiedBook).setEstimatedValue(
+                                readValidInt(scanner, "Нова орієнтовна вартість ($): ", 1, Integer.MAX_VALUE));
                     } else if (modifiedBook instanceof Audiobook) {
                         ((Audiobook) modifiedBook).setNarrator(readNonEmptyString(scanner, "Новий диктор: "));
                     }
                     break;
                 case 9:
                     if (modifiedBook instanceof RareBook) {
-                        ((RareBook) modifiedBook).setFirstPrintYear(readValidInt(scanner, "Новий рік першого видання: ", 1450, modifiedBook.getYear()));
+                        ((RareBook) modifiedBook).setFirstPrintYear(
+                                readValidInt(scanner, "Новий рік першого видання: ", 1450, modifiedBook.getYear()));
                     }
                     break;
             }
@@ -592,9 +613,9 @@ public class Driver {
             } else {
                 System.out.println("Помилка при оновленні книги.");
             }
-        } catch (TitleException | AuthorException | YearException | IsbnException | PagesException | GenreException |
-                 FileSizeException | DurationException | ValueException | FirstPrintYearException |
-                 NarratorException e) {
+        } catch (TitleException | AuthorException | YearException | IsbnException | PagesException | GenreException
+                | FileSizeException | DurationException | ValueException | FirstPrintYearException
+                | NarratorException e) {
             System.out.println("Помилка: " + e.getMessage());
         }
     }
@@ -848,7 +869,8 @@ public class Driver {
     }
 
     /**
-     * Додає нову електронну книгу до бібліотеки після отримання даних від користувача.
+     * Додає нову електронну книгу до бібліотеки після отримання даних від
+     * користувача.
      *
      * @param scanner  Об'єкт Scanner для читання вводу
      * @param library  Об'єкт Library, що містить колекцію книг
@@ -873,19 +895,21 @@ public class Driver {
             } else {
                 System.out.println("Помилка при додаванні книги.");
             }
-        } catch (GenreException | YearException | PagesException | AuthorException |
-                 TitleException | IsbnException | FileSizeException e) {
+        } catch (GenreException | YearException | PagesException | AuthorException | TitleException | IsbnException
+                | FileSizeException e) {
             System.out.println("Помилка введення даних: " + e.getMessage());
         } catch (Exception e) {
             String errorId = UUID.randomUUID().toString();
             showUserFriendlyError("error.general", errorId);
-            log.error("[ErrorID: {}] - Critical error during eBook addition. Контекст: operation='addEBook', quantity={}.",
+            log.error(
+                    "[ErrorID: {}] - Critical error during eBook addition. Контекст: operation='addEBook', quantity={}.",
                     errorId, quantity, e);
         }
     }
 
     /**
-     * Додає нову паперову книгу до бібліотеки після отримання даних від користувача.
+     * Додає нову паперову книгу до бібліотеки після отримання даних від
+     * користувача.
      *
      * @param scanner  Об'єкт Scanner для читання вводу
      * @param library  Об'єкт Library, що містить колекцію книг
@@ -909,8 +933,7 @@ public class Driver {
             } else {
                 System.out.println("Помилка при додаванні книги.");
             }
-        } catch (GenreException | YearException | PagesException | AuthorException |
-                 TitleException | IsbnException e) {
+        } catch (GenreException | YearException | PagesException | AuthorException | TitleException | IsbnException e) {
             System.out.println("Помилка при створенні паперової книги: " + e.getMessage());
         }
     }
@@ -941,14 +964,15 @@ public class Driver {
             } else {
                 System.out.println("Помилка при додаванні книги.");
             }
-        } catch (GenreException | YearException | PagesException | AuthorException |
-                 TitleException | IsbnException | DurationException | NarratorException e) {
+        } catch (GenreException | YearException | PagesException | AuthorException | TitleException | IsbnException
+                | DurationException | NarratorException e) {
             System.out.println("Помилка при створенні аудіокниги: " + e.getMessage());
         }
     }
 
     /**
-     * Додає нову рідкісну книгу до бібліотеки після отримання даних від користувача.
+     * Додає нову рідкісну книгу до бібліотеки після отримання даних від
+     * користувача.
      *
      * @param scanner  Об'єкт Scanner для читання вводу
      * @param library  Об'єкт Library, що містить колекцію книг
@@ -974,8 +998,8 @@ public class Driver {
             } else {
                 System.out.println("Помилка при додаванні книги.");
             }
-        } catch (GenreException | YearException | PagesException | AuthorException |
-                 TitleException | IsbnException | ValueException | FirstPrintYearException e) {
+        } catch (GenreException | YearException | PagesException | AuthorException | TitleException | IsbnException
+                | ValueException | FirstPrintYearException e) {
             System.out.println("Помилка при створенні рідкісної книги: " + e.getMessage());
         }
     }
@@ -1136,59 +1160,59 @@ public class Driver {
 }
 
 /*
-Звичайна книга:
-Грокаємо глибоке вивчення
-Ендрю Траск
-2019
-978-54-461133-4
-352
-Комп'ютерна література
--------------------------
-Електронна книга:
-Core Java Volume I - Fundamentals
-Cay S. Horstmann
-2024
-978-13-532837-3
-1478
-3
-2
-11.3
--------------------------
-Паперова книга:
-1984
-Джордж Орвел
-1949
-978-45-678901-2
-328
-5
-2
-------- ще 1 -----------
-Гобіт, або Туди і звідти
-Дж.Р.Р. Толкін
-1937
-978-00-747606-1
-310
-8
-1
--------------------------
-Аудіокнига:
-Шерлок Холмс. Вивчення в багряних тонах
-Артур Конан Дойл
-2021
-978-33-445566-7
-2
-6.5
-Ігор Степанов
-
--------------------------
-Рідкісна книга:
-Кобзар
-Тарас Шевченко
-1840
-978-00-111222-3
-150
-Історичний
-тверда
-200
-1840
-*/
+ * Звичайна книга:
+ * Грокаємо глибоке вивчення
+ * Ендрю Траск
+ * 2019
+ * 978-54-461133-4
+ * 352
+ * Комп'ютерна література
+ * -------------------------
+ * Електронна книга:
+ * Core Java Volume I - Fundamentals
+ * Cay S. Horstmann
+ * 2024
+ * 978-13-532837-3
+ * 1478
+ * 3
+ * 2
+ * 11.3
+ * -------------------------
+ * Паперова книга:
+ * 1984
+ * Джордж Орвел
+ * 1949
+ * 978-45-678901-2
+ * 328
+ * 5
+ * 2
+ * ------- ще 1 -----------
+ * Гобіт, або Туди і звідти
+ * Дж.Р.Р. Толкін
+ * 1937
+ * 978-00-747606-1
+ * 310
+ * 8
+ * 1
+ * -------------------------
+ * Аудіокнига:
+ * Шерлок Холмс. Вивчення в багряних тонах
+ * Артур Конан Дойл
+ * 2021
+ * 978-33-445566-7
+ * 2
+ * 6.5
+ * Ігор Степанов
+ * 
+ * -------------------------
+ * Рідкісна книга:
+ * Кобзар
+ * Тарас Шевченко
+ * 1840
+ * 978-00-111222-3
+ * 150
+ * Історичний
+ * тверда
+ * 200
+ * 1840
+ */

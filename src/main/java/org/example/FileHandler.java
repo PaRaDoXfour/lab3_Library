@@ -13,7 +13,7 @@ import java.util.UUID;
 public class FileHandler {
     private static Logger log = LoggerFactory.getLogger(FileHandler.class);
     // Ім'я файлу для зберігання даних
-    private static final String FILE_NAME = "input.txt";
+    private static final String FILE_NAME = "massive_input.txt";
 
     /**
      * Зчитує дані про бібліотеку з файлу.
@@ -25,7 +25,8 @@ public class FileHandler {
      *                     Назва бібліотеки
      *                     Адрес бібліотеки
      */
-    public static Library readLibraryFromFile() throws IOException, InvalidDataException, LibraryNameException, LibraryAddressException {
+    public static Library readLibraryFromFile()
+            throws IOException, InvalidDataException, LibraryNameException, LibraryAddressException {
         File file = new File(FILE_NAME);
         if (!file.exists() || file.length() == 0) {
             log.debug("Файл '{}' не існує або порожній: бібліотеку не завантажено.", FILE_NAME);
@@ -138,13 +139,15 @@ public class FileHandler {
                     return new RareBook(title, author, year, isbn, pages, genre, rareHardcover, value, firstPrintYear);
                 default:
                     String errorId = UUID.randomUUID().toString();
-                    log.error("[ErrorID: {}] - Критична помилка при читанні типу книги. Контекст: operation='readBookData', file='{}', type='{}'.",
+                    log.error(
+                            "[ErrorID: {}] - Критична помилка при читанні типу книги. Контекст: operation='readBookData', file='{}', type='{}'.",
                             errorId, FILE_NAME, type);
                     return null;
             }
         } catch (Exception e) {
             String errorId = UUID.randomUUID().toString();
-            log.error("[ErrorID: {}] - Критична помилка при парсингу книги. Контекст: operation='readBookData', file='{}', type='{}'.",
+            log.error(
+                    "[ErrorID: {}] - Критична помилка при парсингу книги. Контекст: operation='readBookData', file='{}', type='{}'.",
                     errorId, FILE_NAME, type, e);
             return null;
         }
@@ -170,7 +173,8 @@ public class FileHandler {
      *
      * @param books список книг для збереження
      * @throws IOException якщо виникнуть проблеми з записом у файл
-     *                     <p></p>
+     *                     <p>
+     *                     </p>
      *                     <br>
      *                     Формат запису:
      *                     Кожна книга зберігається у вигляді послідовності рядків:
@@ -184,7 +188,8 @@ public class FileHandler {
      *                     [Додаткові поля залежно від типу]
      *                     [Пустий рядок]
      */
-    public static void saveBooksToFile(Library library, ArrayList<Book> books) throws IOException, InvalidDataException {
+    public static void saveBooksToFile(Library library, ArrayList<Book> books)
+            throws IOException, InvalidDataException {
         log.debug("Збереження {} книг у файл '{}'.", books.size(), FILE_NAME);
         try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_NAME))) {
             // Спочатку зберігаємо дані бібліотеки
